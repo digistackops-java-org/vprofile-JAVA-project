@@ -65,7 +65,6 @@ Create "t2.micro" EC2 Instance for MEMCACHE and open port "11111" for MEMCACHE
 
 ### Install MEMCACHE
 ```
-sudo dnf install epel-release -y
 sudo dnf install memcached -y
 sudo systemctl start memcached
 sudo systemctl enable memcached
@@ -74,7 +73,7 @@ sudo systemctl status memcached
 
 ### Setup MEMCACHE
 ```
-vim /etc/sysconfig/memcached
+sudo vim /etc/sysconfig/memcached
 ```
 By default memcached allow localhost "127.0.0.0" so we need to replace it with "0.0.0.0"
 
