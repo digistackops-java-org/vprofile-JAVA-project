@@ -204,9 +204,9 @@ mvn clean package
 
 ## Deploy the Package to Tomcat
 ```
-rm -rf /usr/local/tomcat/webapps/ROOT*
-cp target/vprofile-v2.war /usr/local/tomcat/webapps/ROOT.war
-systemctl start tomcat
-chown tomcat.tomcat /usr/local/tomcat/webapps -R
-systemctl restart tomcat
+sudo rm -rf /opt/tomcat/webapps/ROOT*
+sudo cp target/vprofile-v2.war /opt/tomcat/webapps/ROOT.war
+sudo systemctl start tomcat
+sudo chown tomcat.tomcat /opt/tomcat/webapps/ -R
+sudo systemctl restart tomcat
 ```
