@@ -8,75 +8,38 @@ Start the Service
 sudo systemctl start nginx
 sudo systemctl enable nginx
 ```
-Create Frontend Directory
+### Create Proxy File 
 ```
-sudo mkdir -p /var/www/frontend/
-sudo chmod -R 755 /var/www/frontend/
-```
-backup the existing nginx.conf
-```
-sudo mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
-```
+cat <<EOT > vproapp
+upstream vproapp {
 
-Edit your the Backend IP Address in nginx.conf
-```
-sudo vim /etc/nginx/nginx.conf
-```
-Cop and Paste the nginx.conf and edit the Backend IP
-```
-#user  nobody;
-worker_processes  1;
+ server app01:8080;
 
-events {
-    worker_connections  1024;
 }
 
-http {
-    include       mime.types;
-    default_type  application/octet-stream;
+server {
 
-    sendfile        on;
-    keepalive_timeout  65;
+  listen 80;
 
-    # Gzip for faster frontend load
-    gzip on;
-    gzip_types text/plain application/javascript application/x-javascript text/javascript text/xml text/css application/xml;
-    gzip_min_length 256;
+location / {
 
-    server {
-        listen       80;
-        server_name  localhost;
+  proxy_pass http://vproapp;
 
-        # Root for React build files
-        root   /var/www/frontend/;
-        index  index.html index.htm;
-
-        # Serve React app for all non-API routes
-        location / {
-            try_files $uri /index.html;
-        }
-
-        # Reverse proxy for backend API
-        location /api/ {
-            proxy_pass http://<Backend-IP>:8080/;   # <-- IMPORTANT: trailing slash
-            proxy_http_version 1.1;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection 'upgrade';
-            proxy_set_header Host $host;
-            proxy_cache_bypass $http_upgrade;
-        }
-
-        # Error pages
-        error_page   500 502 503 504  /50x.html;
-        location = /50x.html {
-            root   /usr/share/nginx/html;
-        }
-    }
 }
-```
 
-restart Nginx 
+}
+
+EOT
 ```
-sudo nginx -t
+### Move that file and Enable Nginx as LB
+```
+sudo mv vproapp /etc/nginx/sites-available/vproapp
+sudo rm -rf /etc/nginx/sites-enabled/default
+sudo ln -s /etc/nginx/sites-available/vproapp /etc/nginx/sites-enabled/vproapp
+```
+starting nginx service and firewall
+```
+sudo systemctl start nginx
+sudo systemctl enable nginx
 sudo systemctl restart nginx
 ```
