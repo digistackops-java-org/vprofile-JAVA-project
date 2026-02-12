@@ -85,31 +85,98 @@ sudo systemctl restart memcached
 
 
 # RABBITMQ Setup
-Create "t2.micro" EC2 Instance for RABBITMQ and open port "5672" for RABBITMQ 
-
-### Install RABBITMQ
+## Must use Redhat 'RHEL-9' & "t2.small" EC2 Instance for RABBITMQ and open port "5672" for RABBITMQ 
+Make sure you are on RHEL 9:
 ```
-sudo dnf install epel-release -y
-sudo dnf -y install centos-release-rabbitmq-38
-sudo dnf --enablerepo=centos-rabbitmq-38 -y install rabbitmq-server
-sudo systemctl enable --now rabbitmq-server
+cat /etc/redhat-release
+```
+Minimum Recommend RAM 2GB
+```
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+```
+Install required system tools
+```
+sudo dnf install -y curl gnupg2 ca-certificates
+```
+#### Step 1: Add BOTH official repos (Erlang + RabbitMQ)
+```
+sudo tee /etc/yum.repos.d/rabbitmq.repo > /dev/null <<'EOF'
+[modern-erlang]
+name=modern-erlang-el9
+baseurl=https://yum1.rabbitmq.com/erlang/el/9/$basearch
+        https://yum2.rabbitmq.com/erlang/el/9/$basearch
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://github.com/rabbitmq/signing-keys/releases/download/3.0/cloudsmith.rabbitmq-erlang.E495BB49CC4BBE5B.key
 
+[rabbitmq-el9]
+name=rabbitmq-el9
+baseurl=https://yum1.rabbitmq.com/rabbitmq/el/9/noarch
+        https://yum2.rabbitmq.com/rabbitmq/el/9/noarch
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://github.com/rabbitmq/signing-keys/releases/download/3.0/cloudsmith.rabbitmq-server.9F4587F226208342.key
+EOF
 ```
 
-### Setup RABBITMQ
+#### Step 2: Import signing keys (official)
 ```
-sudo sh -c 'echo "[{rabbit, [{loopback_users, []}]}]." > /etc/rabbitmq/rabbitmq.config'
-sudo rabbitmqctl add_user test test
-sudo rabbitmqctl set_user_tags test administrator
-sudo rabbitmqctl set_permissions -p / test ".*" ".*" ".*"
+sudo rpm --import https://github.com/rabbitmq/signing-keys/releases/download/3.0/rabbitmq-release-signing-key.asc
+sudo rpm --import https://github.com/rabbitmq/signing-keys/releases/download/3.0/cloudsmith.rabbitmq-erlang.E495BB49CC4BBE5B.key
+sudo rpm --import https://github.com/rabbitmq/signing-keys/releases/download/3.0/cloudsmith.rabbitmq-server.9F4587F226208342.key
+```
+#### Step 3: Clean and refresh DNF cache
+```
+sudo dnf clean all -y
+sudo dnf makecache -y
+```
+Verify repos:
+```
+sudo dnf repolist | grep -E "rabbitmq|erlang"
+```
+You see output
+    modern-erlang
+    rabbitmq-el9
+#### Step 4: Install Erlang + RabbitMQ
+```
+sudo dnf install -y erlang rabbitmq-server
+```
+#### Step 5: Start RabbitMQ
+```
+sudo systemctl enable rabbitmq-server
+sudo systemctl start rabbitmq-server
+sudo systemctl status rabbitmq-server
+```
+## If you want UI option {optional}
+```
+sudo rabbitmq-plugins enable rabbitmq_management
 sudo systemctl restart rabbitmq-server
 ```
-By default memcached allow localhost "127.0.0.0" so we need to replace it with "0.0.0.0"
+open in browser
+```
+http://<EC2-PUBLIC-IP>:15672
+```
 
-#### Restart RABBITMQ
+## Create Admin User (important for remote access)
+
+By default guest only works locally.
+```
+sudo rabbitmqctl add_user <username> <StrongPassword>
+sudo rabbitmqctl set_user_tags <username> administrator
+sudo rabbitmqctl set_permissions -p / <username> ".*" ".*" ".*"
+```
+```
+sudo rabbitmqctl add_user admin PassWord@123
+sudo rabbitmqctl set_user_tags admin administrator
+sudo rabbitmqctl set_permissions -p / admin ".*" ".*" ".*"
 
 ```
-sudo systemctl start rabbitmq-server
-sudo systemctl enable rabbitmq-server
-sudo systemctl status rabbitmq-server
+restart RabbitMQ Server
+```
+sudo systemctl restart rabbitmq-server
 ```
