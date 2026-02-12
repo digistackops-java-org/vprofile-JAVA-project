@@ -181,18 +181,18 @@ sudo dnf install mysql-community-client -y
 Step:2 ==> Execute your "db_backup.sql" script for your Application DB setup
 
 ```
-mysql -h <DB-Prvate-IP> -udbadmin -pAdmin@123 < src/main/resources/db_backup.sql
+mysql -h <DB-Private-IP> -udbadmin -pAdmin@123 accounts < src/main/resources/db_backup.sql
 ```
 Step:3 ==> Verify DB created or Not
 ```
-mysql -u root -padmin123 accounts
+mysql -h <DB-Private-IP> -udbadmin -pAdmin@123 accounts
 show tables;
 exit;
 ```
 ## Update the DB Configuration
 
 ```
-vim src/main/resources/application.properties
+sudo vim src/main/resources/application.properties
 ```
 Update you DB Details
 
