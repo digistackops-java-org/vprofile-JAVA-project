@@ -57,3 +57,60 @@ CREATE USER 'dbadmin'@'%' IDENTIFIED BY 'Admin@123';
 GRANT ALL PRIVILEGES ON *.* TO 'dbadmin'@'%' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 ```
+
+
+
+# MEMCACHE Setup
+Create "t2.micro" EC2 Instance for MEMCACHE and open port "11111" for MEMCACHE 
+
+### Install MEMCACHE
+```
+sudo dnf install epel-release -y
+sudo dnf install memcached -y
+sudo systemctl start memcached
+sudo systemctl enable memcached
+sudo systemctl status memcached
+```
+
+### Setup MEMCACHE
+```
+vim /etc/sysconfig/memcached
+```
+By default memcached allow localhost "127.0.0.0" so we need to replace it with "0.0.0.0"
+
+#### Restart MEMCACHE
+
+```
+sudo systemctl restart memcached
+```
+
+
+# RABBITMQ Setup
+Create "t2.micro" EC2 Instance for RABBITMQ and open port "5672" for RABBITMQ 
+
+### Install RABBITMQ
+```
+sudo dnf install epel-release -y
+sudo dnf -y install centos-release-rabbitmq-38
+sudo dnf --enablerepo=centos-rabbitmq-38 -y install rabbitmq-server
+sudo systemctl enable --now rabbitmq-server
+
+```
+
+### Setup RABBITMQ
+```
+sudo sh -c 'echo "[{rabbit, [{loopback_users, []}]}]." > /etc/rabbitmq/rabbitmq.config'
+sudo rabbitmqctl add_user test test
+sudo rabbitmqctl set_user_tags test administrator
+sudo rabbitmqctl set_permissions -p / test ".*" ".*" ".*"
+sudo systemctl restart rabbitmq-server
+```
+By default memcached allow localhost "127.0.0.0" so we need to replace it with "0.0.0.0"
+
+#### Restart RABBITMQ
+
+```
+sudo systemctl start rabbitmq-server
+sudo systemctl enable rabbitmq-server
+sudo systemctl status rabbitmq-server
+```
