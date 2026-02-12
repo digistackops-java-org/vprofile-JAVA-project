@@ -57,7 +57,23 @@ CREATE USER 'dbadmin'@'%' IDENTIFIED BY 'Admin@123';
 GRANT ALL PRIVILEGES ON *.* TO 'dbadmin'@'%' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 ```
-
+#### Create Accounts DB 
+```
+CREATE DATABASE IF NOT EXISTS accounts;
+```
+#### Create Application user (if not exists)
+```
+CREATE USER IF NOT EXISTS 'appuser'@'%' IDENTIFIED BY 'P@55Word';
+```
+#### Grant Priviliges to Application user to DB accounts
+```
+GRANT ALL PRIVILEGES ON accounts.* TO 'appuser'@'%';
+FLUSH PRIVILEGES;
+```
+##### verify the Application user Pemissions
+```
+SHOW GRANTS FOR 'appuser'@'%';
+```
 
 
 # MEMCACHE Setup
@@ -140,8 +156,8 @@ Verify repos:
 sudo dnf repolist | grep -E "rabbitmq|erlang"
 ```
 You see output
-    modern-erlang
-    rabbitmq-el9
+    "modern-erlang"
+    "rabbitmq-el9"
 #### Step 4: Install Erlang + RabbitMQ
 ```
 sudo dnf install -y erlang rabbitmq-server
@@ -171,7 +187,7 @@ sudo rabbitmqctl set_user_tags <username> administrator
 sudo rabbitmqctl set_permissions -p / <username> ".*" ".*" ".*"
 ```
 ```
-sudo rabbitmqctl add_user admin PassWord@123
+sudo rabbitmqctl add_user admin P@55Word
 sudo rabbitmqctl set_user_tags admin administrator
 sudo rabbitmqctl set_permissions -p / admin ".*" ".*" ".*"
 
