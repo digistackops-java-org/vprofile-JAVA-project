@@ -164,7 +164,7 @@ Switch branch
 
 ```
 sudo git checkout 01-Local-Vprofile-Prod-V1
-sudo chown -R $USER:$USER /app/JAVA-3-tier-UMS-Loca
+sudo chown -R $USER:$USER /app/vprofile-JAVA-project
 ```
 # Backend Setup
 
