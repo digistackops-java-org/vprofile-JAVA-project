@@ -1,0 +1,131 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vprofile-app
+  labels:
+    app: vprofile
+    version: v1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: vprofile
+  template:
+    metadata:
+      labels:
+        app: vprofile
+        version: v1
+    spec:
+      containers:
+      - name: vprofile
+        image: your-registry/vprofile:latest
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        
+        # Environment variables
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "prod"
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: vprofile-config
+              key: database.host
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: vprofile-secrets
+              key: database.username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: vprofile-secrets
+              key: database.password
+        
+        # Resource limits
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        
+        # Liveness Probe
+        # Checks if the application is alive
+        # If this fails, Kubernetes will restart the container
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 60    # Wait 60s after container starts
+          periodSeconds: 10           # Check every 10 seconds
+          timeoutSeconds: 5           # Timeout after 5 seconds
+          failureThreshold: 3         # Restart after 3 consecutive failures
+          successThreshold: 1         # Consider healthy after 1 success
+        
+        # Readiness Probe
+        # Checks if the application is ready to serve traffic
+        # If this fails, Kubernetes will stop sending traffic to this pod
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 30    # Start checking after 30s
+          periodSeconds: 5           # Check every 5 seconds
+          timeoutSeconds: 3          # Timeout after 3 seconds
+          failureThreshold: 3        # Mark as not ready after 3 failures
+          successThreshold: 1        # Mark as ready after 1 success
+        
+        # Startup Probe (Optional - for slow-starting applications)
+        # Gives the app more time to start before liveness probe kicks in
+        startupProbe:
+          httpGet:
+            path: /health/live
+            port: 8080
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30       # Allow up to 300 seconds (30 * 10) to start
+          successThreshold: 1
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vprofile-service
+  labels:
+    app: vprofile
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: vprofile
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vprofile-config
+data:
+  database.host: "mysql-service.default.svc.cluster.local"
+  database.port: "3306"
+  database.name: "vprofiledb"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vprofile-secrets
+type: Opaque
+stringData:
+  database.username: "vprofile"
+  database.password: "your-secure-password-here"
