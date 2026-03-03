@@ -104,7 +104,7 @@ sudo systemctl enable tomcat
 sudo systemctl start tomcat
 ```
 
-## Tomcat Configuration
+### Tomcat Configuration
 
 #### Manage Users & Roles in Tomcat
 
@@ -148,8 +148,7 @@ Remove and Replace with the Below Content
 </Context>
 ```
 
-# Code Build and Deploy
-## Get the Code
+Step:3 ==> Get the Code
 ### We keep application in one standard location. This is a usual practice that runs in the organization. Lets setup an app directory.
 ```
 sudo mkdir /app
@@ -159,7 +158,6 @@ sudo mkdir /app
 cd /app
 sudo git clone https://github.com/digistackops-java-org/vprofile-JAVA-project.git
 cd vprofile-JAVA-project
-sudo chown -R ec2-user:ec2-user /app/vprofile-JAVA-project
 ```
 Switch branch
 
@@ -167,7 +165,7 @@ Switch branch
 sudo git checkout 01-Local-Vprofile-Prod-V1
 sudo chown -R $USER:$USER /app/vprofile-JAVA-project
 ```
-# Backend Setup
+# Step:4 ==> Build teh Package 
 
 ## Setup your Application Database by executing "db_backup.sql" script from Application-server
 
@@ -190,14 +188,14 @@ mysql -h <DB-Private-IP> -udbadmin -pAdmin@123 accounts
 show tables;
 exit;
 ```
-## Update the DB Configuration
+### Update the DB Configuration
 
 ```
 sudo vim src/main/resources/application.properties
 ```
 Update you DB Details
 
-### Create the Package
+## Create the Package
 Build your Package
 ```
 mvn clean package
