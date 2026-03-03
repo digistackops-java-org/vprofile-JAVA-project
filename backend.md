@@ -1,25 +1,26 @@
 
-# Tools-Setup
-
+# Backend-JAVA Application server
+## Launch EC2 "t2.micro" Instance and In Sg, Open port "8080" for JAVA Application 
+# Step:1 ==> Install the Required packages
 ```
 Launch Ec2 Instance and use Amazon Linux 2 AMI with t2.micro Instance and 
 open port "8080" in Seaurity Group for TOMCAT
 ```
 # Tools Setup For the Project 
 
-####  Install GIT
+### Install GIT
 ```
 sudo yum install git -y
 ``` 
 
-## Install JAVA
+### Install JAVA
 ####  Installation of openJDK 17
 ```
 sudo dnf update -y
 sudo yum install java-17-amazon-corretto-devel -y
 ``` 
 
-## Install Maven
+### Install Maven
 ```
 sudo wget https://dlcdn.apache.org/maven/maven-3/3.9.12/binaries/apache-maven-3.9.12-bin.tar.gz
 sudo tar xzf apache-maven-3.9.12-bin.tar.gz -C /opt
@@ -42,7 +43,7 @@ source /etc/profile.d/maven.sh
 mvn -version
 ```
 
-## Install Tomcat for Developemnt ENV
+### Install Tomcat 
 ####  Create Tomcat User
 ```
 sudo groupadd tomcat
